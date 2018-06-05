@@ -214,12 +214,27 @@ CircMed_Bayes_Product <- function (x,m,y) {
   }
 
 
+sim_data <- function(a,b,c,n) {
+  
+  x <- rnorm(n,0,1)
+  m <- rnorm(n,(a*x),1)
+  y <- rep(0,n)
+  
+  beta <- c(c,b)
+  pred <- cbind(x,m)
+  linkfun   = function(x) 2 * atan(x)
+  
+  con <- linkfun(apply(pred, 1, "%*%", beta))
+  
+  y_pred <- 1+con 
+  err <- rvmc(n,0,5)
+  y <- y_pred + err
+  y <- as.circular(y)
+  
+  data.frame(x,m,y)
+}
 
-CircMed_Product(x,m,y)
-CircMed_Diff(x,m,y)
-CircMed_Reparameter(x,m,y)
-CircMed_Bayes_Diff(x,m,y)
-CircMed_Bayes_Product(x,m,y)
+
 
 
 ###################################################################################################
