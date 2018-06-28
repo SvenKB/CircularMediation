@@ -2,9 +2,6 @@
 library(circular)
 library(circglmbayes)
 library(coda)
-library(brms)
-library(rstanarm)
-
 
 
 # Difference in coefficients
@@ -205,11 +202,10 @@ CircMed_Bayes_Product <- function (dat) {
 }
 
 
-sim_data <- function(a,b,c,n,N) {
+sim_data <- function(a,b,c,n) {
  
-  data <- vector("list",N)
   linkfun   = function(x) 2 * atan(x)
-  for (i in 1:N) {
+
   x <- rnorm(n,0,1)
   m <- rnorm(n,(a*x),1)
   y <- rep(0,n)
@@ -224,8 +220,8 @@ sim_data <- function(a,b,c,n,N) {
   y <- y_pred + err
   y <- as.circular(y)
   
-  data[[i]] <- data.frame(x,m,y)
-  }
+  data <- data.frame(x,m,y)
+  
   return(data)
 }
 
