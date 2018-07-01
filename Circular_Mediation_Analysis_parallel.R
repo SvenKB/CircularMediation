@@ -10,6 +10,14 @@ library(parallel)
 
 #### Load datasets
 
+
+# Prepare true parameter
+truea <- c(.1,.2,.4,0)
+trueb <- c(.1,.2,.4,0)
+truec <- c(.1,.2,.4,0)
+truen <- c(30,100,200)
+nsim=100
+
 loadDatasets <- function(truen,truea,trueb,truec,nsim) {
 
   
@@ -61,7 +69,7 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   return(data)
 }
 
-simData <- loadDatasets(truen,truea,trueb,truec,nsim)
+simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim)
 
 #### Analyse datasets
 
@@ -94,10 +102,10 @@ analyseSimDataPar <- function(simData,fun) {
 }
 
 
-resultsDiff <- analyseSimDataPar(simData,CircMed_Diff)
-resultsProd <- analyseSimDataPar(simData,CircMed_Product) 
-resultsRepara <- analyseSimDataPar(simData,CircMed_Reparameter)
-resultsDiffBayes <- analyseSimDataPar(simData,CircMed_Bayes_Diff)
-resultsProdBayes <- analyseSimDataPar(simData,CircMed_Bayes_Product)
+resultsDiff <- analyseSimDataPar(simulatedData,CircMed_Diff)
+resultsProd <- analyseSimDataPar(simulatedData,CircMed_Product) 
+resultsRepara <- analyseSimDataPar(simulatedData,CircMed_Reparameter)
+resultsDiffBayes <- analyseSimDataPar(simulatedData,CircMed_Bayes_Diff)
+resultsProdBayes <- analyseSimDataPar(simulatedData,CircMed_Bayes_Product)
 
 

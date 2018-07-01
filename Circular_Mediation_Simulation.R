@@ -9,7 +9,7 @@
 # Prepare true parameter
 truea <- c(.1,.2,.4,0)
 trueb <- c(.1,.2,.4,0)
-truec <- c(.1,.2,.4,0-..)
+truec <- c(.1,.2,.4,0)
 truen <- c(30,100,200)
 nsim=100
 

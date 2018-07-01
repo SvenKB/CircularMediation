@@ -4,6 +4,15 @@
 
 #### Load datasets
 
+# Prepare true parameter
+truea <- c(.1,.2,.4,0)
+trueb <- c(.1,.2,.4,0)
+truec <- c(.1,.2,.4,0)
+truen <- c(30,100,200)
+nsim=100
+
+
+
 loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   
   #Prepare all possible designs
@@ -54,7 +63,7 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   return(data)
 }
 
-simData <- loadDatasets(truen,truea,trueb,truec,nsim)
+simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim)
 
 #### Analyse datasets
 
@@ -78,10 +87,10 @@ analyseSimData <- function(simData,fun) {
   return(estimates)
 }
 
-system.time(
-resultsDiff <- analyseSimData(simData,CircMed_Diff)
-)
-resultsProd <- analyseSimData(simData,CircMed_Product) 
-resultsRepara <- analyseSimData(simData,CircMed_Reparameter)
-resultsDiffBayes <- analyseSimData(simData,CircMed_Bayes_Diff)
-resultsProdBayes <- analyseSimData(simData,CircMed_Bayes_Product)
+
+resultsDiff <- analyseSimData(simulatedData,CircMed_Diff)
+
+resultsProd <- analyseSimData(simulatedData,CircMed_Product) 
+resultsRepara <- analyseSimData(simulatedData,CircMed_Reparameter)
+resultsDiffBayes <- analyseSimData(simulatedData,CircMed_Bayes_Diff)
+resultsProdBayes <- analyseSimData(simulatedData,CircMed_Bayes_Product)
