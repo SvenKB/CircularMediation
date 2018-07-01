@@ -121,7 +121,7 @@ CircMed_Reparameter <- function(dat) {
   # Prepare output
   kappa <- mediated_model$kappa
   output <- list(total_effect,direct_effect,indirect_effect,kappa)
-  names(output) <- c("Total","Direct","Indirect","kappa")
+  names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
   return(output)
 }
 
@@ -157,7 +157,13 @@ CircMed_Bayes_Diff <- function(dat) {
   mcmcsum <- summary(mcmc(mediation_sample_difference)) 
   
   # Combine into a table. 
-  list(cbind(mcmcsum$statistics, mcmcsum$quantiles),kappa=mediated_model$kp_mean)
+  #list(cbind(mcmcsum$statistics, mcmcsum$quantiles),kappa=mediated_model$kp_mean)
+  output <- list(mcmcsum$statistics[1,1],
+                 mcmcsum$statistics[2,1],
+                 mcmcsum$statistics[3,1],
+                 mediated_model$kp_mean)
+  names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  return(output)
 }
 
 CircMed_Bayes_Product <- function (dat) {
@@ -197,12 +203,17 @@ CircMed_Bayes_Product <- function (dat) {
   mcmcsum <- summary(mcmc(mediation_sample_product)) 
   
   # Combine into a table. 
-  list(cbind(mcmcsum$statistics, mcmcsum$quantiles),kappa=mediated_model$kp_mean)
-  
+  #list(cbind(mcmcsum$statistics, mcmcsum$quantiles),kappa=mediated_model$kp_mean)
+  output <- list(mcmcsum$statistics[1,1],
+                 mcmcsum$statistics[2,1],
+                 mcmcsum$statistics[3,1],
+                 mediated_model$kp_mean)
+  names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  return(output)
 }
 
 
-sim_data <- function(a,b,c,n) {
+simData <- function(a,b,c,n) {
  
   linkfun   = function(x) 2 * atan(x)
 
