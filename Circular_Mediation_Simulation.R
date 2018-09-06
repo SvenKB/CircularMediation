@@ -2,6 +2,11 @@
 #### Simulation setup for Circular Mediation ####
 #################################################
 
+#### Set working directory ####
+file.choose()
+setwd("/Users/skb/Dropbox/Uni/Student Assistant/Irene Klugkist/")
+
+
 ###########################
 #### Preparing Samples ####
 ###########################
@@ -31,7 +36,7 @@ saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
     
     # Prepare saving datasets
     DirName <- paste0(getwd(),
-                      "/Data/Datasets",
+                      "/Data/Datasets_",
                       "n=", curr_n,
                       "a=", curr_a,
                       "b=", curr_b,
@@ -44,7 +49,7 @@ saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
       filename <- paste0(DirName,"/nr",j,".csv")
       
       if (!file.exists(filename)) {
-        dat <- sim_data(a=curr_a,b=curr_b,c=curr_c,n=curr_n)
+        dat <- simData(a=curr_a,b=curr_b,c=curr_c,n=curr_n)
         write.table(dat, filename, sep = ",", row.names=FALSE, col.names=FALSE)
       } else {
         existingDesigns <- existingDesigns + 1

@@ -18,6 +18,9 @@ truec <- c(.1,.2,.4,0)
 truen <- c(30,100,200)
 nsim=100
 
+saveRDS()
+readRDS()
+
 loadDatasets <- function(truen,truea,trueb,truec,nsim) {
 
   
@@ -35,7 +38,7 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
     
     # Prepare loading datasets
     DirName <- paste0(getwd(),
-                      "/Data/Datasets",
+                      "/Data/Datasets_",
                       "n=", curr_n,
                       "a=", curr_a,
                       "b=", curr_b,
@@ -68,24 +71,41 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   }
   return(data)
 }
-
+rm(simulatedData)
 simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim)
 
 #### Analyse datasets
 
-analyseSimDataPar <- function(simData,fun) {
+analyseSimDataPar <- function(simData,method) {
   # Calculate the number of cores
   no_cores <- detectCores() - 1
   
   # Initiate cluster
   cl <- makeCluster(no_cores, type = "FORK")
-  
+
+  if (method == "CM_Diff") {
+    fun <- CircMed_Diff
+  } else if (method == "CM_Prod") {
+    fun <- CircMed_Product
+  } else if (method == "CM_Repara") {
+    fun <- CircMed_Reparameter
+  } else if (method == "CM_B_D") {
+    fun <- CircMed_Bayes_Diff
+  } else if (method == "CM_B_P") {
+    fun <- CircMed_Bayes_Product
+  }  
   
   result <- list()
   for (i in 1:length(simData)) {
     result[[i]] <- parLapply(cl,simData[[i]],fun)
   }
   estimates <- list()
+  if (method == "CM_B_D" | method == "CM_B_P" ) {
+    for (i in 1:length(result)) {
+      estimates[[i]] <-list(cbind("Estimates"=result[[i]]$nr1[[1]],result[[i]]$nr1[[2]]),"Resid.Kappa"=result[[i]]$nr1[[3]])
+    }
+    
+  } else {
   a <- matrix(0,  length(simData[[1]]),length(result[[1]]$nr1))
   for (j in 1:length(result)) {
     
@@ -95,6 +115,7 @@ analyseSimDataPar <- function(simData,fun) {
     estimates[[j]] <- a
     colnames(estimates[[j]]) <- names(result[[1]]$nr1)
   }
+  }
   stopCluster(cl)
   names(estimates) <- names(simData)
   
@@ -102,10 +123,16 @@ analyseSimDataPar <- function(simData,fun) {
 }
 
 
-resultsDiff <- analyseSimDataPar(simulatedData,CircMed_Diff)
-resultsProd <- analyseSimDataPar(simulatedData,CircMed_Product) 
-resultsRepara <- analyseSimDataPar(simulatedData,CircMed_Reparameter)
-resultsDiffBayes <- analyseSimDataPar(simulatedData,CircMed_Bayes_Diff)
-resultsProdBayes <- analyseSimDataPar(simulatedData,CircMed_Bayes_Product)
+resultsDiff <- analyseSimDataPar(simulatedData,"CM_Diff")
+resultsProd <- analyseSimDataPar(simulatedData,"CM_Prod") 
+resultsRepara <- analyseSimDataPar(simulatedData,"CM_Repara")
+resultsDiffBayes <- analyseSimDataPar(simulatedData,"CM_B_D")
+resultsProdBayes <- analyseSimDataPar(simulatedData,"CM_B_P") 
 
+saveRDS(resultsDiff, "resultsDiff.RDS")
+saveRDS(resultsProd, "resultsProd.RDS")
+saveRDS(resultsRepara, "resultsRepara.RDS")
+saveRDS(resultsDiffBayes, "resultsDiffBayes.RDS")
+saveRDS(resultsProdBayes, "resultsProdBayes.RDS")
 
+resultsDiffBayes$`n=30a=0.1b=0.1c=0.1`[[1]]

@@ -22,10 +22,13 @@ CircMed_Diff <- function(dat) {
   outcome <- as.circular(y)
   
   # Models
+  mediator_model <- lm(m~x, data=dat)
   mediated_model <- circular:::lm.circular.cl(y = outcome ,x = predictors , init = c(0,0))
   direct_model <- circular:::lm.circular.cl(y = outcome,x = predictors[,1], init = 0)
  
   # Coefficients
+  a <- mediator_model$coefficients[[2]]
+  b <- mediated_model$coefficients[[2]]
   c <- mediated_model$coefficients[[1]]
   c_tilde <- direct_model$coefficients
   
@@ -36,8 +39,8 @@ CircMed_Diff <- function(dat) {
   
   # Prepare output
   kappa <- mediated_model$kappa
-  output <- list(total_effect,direct_effect,indirect_effect,kappa)
-  names(output) <- c("Total","Direct","Indirect","Residual Kappa")
+  output <- list(total_effect,direct_effect,indirect_effect,a,b,kappa)
+  names(output) <- c("Total","Direct","Indirect","a","b","Residual Kappa")
   
   return(output)
   }
@@ -66,8 +69,8 @@ CircMed_Product <- function(dat) {
   
   # Coefficients
   a <- mediator_model$coefficients[[2]]
-  b <- mediated_model$coefficients[[1]]
-  c <- mediated_model$coefficients[[2]]
+  b <- mediated_model$coefficients[[2]]
+  c <- mediated_model$coefficients[[1]]
   c_tilde <- total_model$coefficients
 
   # Calculate effects
@@ -112,7 +115,10 @@ CircMed_Reparameter <- function(dat) {
   mediated_model <- circular:::lm.circular.cl(y = outcome ,x = predictors , init = c(0,0))
   # a-path model
   mediator_model <- lm(m~x,data=dat)
-
+  
+  #Coefficients
+  a <- mediator_model$coefficients[[2]]
+  b <- mediated_model$coefficients[[2]]
   # Calculate effects
   total_effect <- mediated_model$coefficients[[1]]
   indirect_effect <- mediator_model$coefficients[[2]]*mediated_model$coefficients[[2]]
@@ -120,8 +126,8 @@ CircMed_Reparameter <- function(dat) {
   
   # Prepare output
   kappa <- mediated_model$kappa
-  output <- list(total_effect,direct_effect,indirect_effect,kappa)
-  names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  output <- list(total_effect,direct_effect,indirect_effect,a,b,kappa)
+  names(output) <- c("Total","Direct","Indirect","a","b","Resid. Kappa")
   return(output)
 }
 
@@ -145,24 +151,30 @@ CircMed_Bayes_Diff <- function(dat) {
   
   
   # Models
+  pred_med <- lm(m~x, data=data)
+  a <- rnorm(50000,pred_med$coefficients[2], summary(pred_med)$coefficients[2,2])
   total_model    <- circGLM(y ~ x, data = data, Q = 50000)
   mediated_model  <- circGLM(y ~ x+m, data = data, Q = 50000)
   
   # The posterior sample of mediation effects using difference method. 
   mediation_sample_difference <- cbind(total    = total_model$bt_chain[,1], 
                                        direct   = mediated_model$bt_chain[,1],
-                                       indirect = total_model$bt_chain[,1] - mediated_model$bt_chain[,1])
+                                       indirect = total_model$bt_chain[,1] - mediated_model$bt_chain[,1],
+                                       b =  mediated_model$bt_chain[,2],
+                                       a = a)
   
   # Obtain a summary of effects
   mcmcsum <- summary(mcmc(mediation_sample_difference)) 
   
   # Combine into a table. 
   #list(cbind(mcmcsum$statistics, mcmcsum$quantiles),kappa=mediated_model$kp_mean)
-  output <- list(mcmcsum$statistics[1,1],
-                 mcmcsum$statistics[2,1],
-                 mcmcsum$statistics[3,1],
-                 mediated_model$kp_mean)
-  names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  #output <- list(mcmcsum$statistics[1,1],
+  #               mcmcsum$statistics[2,1],
+  #               mcmcsum$statistics[3,1],
+  #               mediated_model$kp_mean)
+  #names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  output <- list(mcmcsum$statistics, mcmcsum$quantiles,kappa=mediated_model$kp_mean)
+  
   return(output)
 }
 
@@ -204,11 +216,12 @@ CircMed_Bayes_Product <- function (dat) {
   
   # Combine into a table. 
   #list(cbind(mcmcsum$statistics, mcmcsum$quantiles),kappa=mediated_model$kp_mean)
-  output <- list(mcmcsum$statistics[1,1],
-                 mcmcsum$statistics[2,1],
-                 mcmcsum$statistics[3,1],
-                 mediated_model$kp_mean)
-  names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  #output <- list(mcmcsum$statistics[1,1],
+  #               mcmcsum$statistics[2,1],
+  #               mcmcsum$statistics[3,1],
+  #               mediated_model$kp_mean)
+  #names(output) <- c("Total","Direct","Indirect","Resid. Kappa")
+  output <- list(mcmcsum$statistics, mcmcsum$quantiles,kappa=mediated_model$kp_mean)
   return(output)
 }
 
@@ -235,7 +248,8 @@ simData <- function(a,b,c,n) {
   
   return(data)
 }
-
+dat <- simData(.1,.1,.1,100)
+CircMed_Bayes_Diff(dat)
 ###################################################################################################
 ###################################################################################################
 ###################################################################################################
