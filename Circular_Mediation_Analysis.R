@@ -1,7 +1,7 @@
 #########################
 #### Analyse samples ####
 #########################
-
+library(boot)
 #### Load datasets
 
 # Prepare true parameter
@@ -9,9 +9,10 @@ truea <- c(.1,.2,.4,0)
 trueb <- c(.1,.2,.4,0)
 truec <- c(.1,.2,.4,0)
 truen <- c(30,100,200)
-nsim=100
+nsim=1
 
 
+?read.csv
 
 loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   
@@ -46,7 +47,8 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
       filenumber <- paste0("nr",j)
       
       if (file.exists(filename)) {
-        dat[[filenumber]] <- read.csv(filename)
+        dat[[filenumber]] <- read.csv(filename,header = FALSE)
+        names(dat[[filenumber]]) <- c("x","m","y")
         
       } else {
         nonexistendDesigns <- nonexistendDesigns + 1
@@ -63,8 +65,7 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   return(data)
 }
 
-simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim)
-
+simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim=1)
 
 #### Analyse datasets
 analyseSimData <- function(simData, method) {
@@ -82,10 +83,16 @@ analyseSimData <- function(simData, method) {
   }
   
   result <- list()
-  for (i in 1:length(simData)) {
-    result[[i]] <- lapply(simData[[i]],fun)
-  }
-  
+  if (method == "CM_Diff") {
+    for (i in 1:length(simData)) {
+      result[[i]] <- lapply(simData[[i]],mediationBootstrap, fun = CircMed_Diff)
+    }
+  } else {
+    for (i in 1:length(simData)) {
+      result[[i]] <- lapply(simData[[i]],fun)
+    }
+    
+  } 
   estimates <- list()
   if (method == "CM_B_D" | method == "CM_B_P" ) {
     for (i in 1:length(result)) {
@@ -108,8 +115,13 @@ analyseSimData <- function(simData, method) {
   return(estimates)
 }
 
+typeof(simulatedData[[1]])
+
+testtest <- lapply(simulatedData,mediationBootstrap, fun = CircMed_Product)
+
 
 resultsDiff <- analyseSimData(simulatedData,"CM_Diff")
+
 saveRDS(resultsDiff, "resultsDiff.RDS")
 resultsProd <- analyseSimData(simulatedData,"CM_Prod")
 saveRDS(resultsProd, "resultsProd.RDS")
@@ -121,5 +133,3 @@ resultsProdBayes <- analyseSimData(simulatedData,"CM_B_P")
 saveRDS(resultsProdBayes, "resultsProdBayes.RDS")
 
 difference <- readRDS("resultsDiff.RDS")
-
-difference

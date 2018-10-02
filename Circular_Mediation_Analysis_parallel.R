@@ -3,7 +3,6 @@ library(doParallel)
 library(parallel)
 
 
-
 #########################
 #### Analyse samples ####
 #########################
@@ -71,7 +70,7 @@ loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   }
   return(data)
 }
-rm(simulatedData)
+
 simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim)
 
 #### Analyse datasets
@@ -135,4 +134,4 @@ saveRDS(resultsRepara, "resultsRepara.RDS")
 saveRDS(resultsDiffBayes, "resultsDiffBayes.RDS")
 saveRDS(resultsProdBayes, "resultsProdBayes.RDS")
 
-resultsDiffBayes$`n=30a=0.1b=0.1c=0.1`[[1]]
+

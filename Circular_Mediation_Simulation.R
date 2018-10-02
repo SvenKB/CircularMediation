@@ -4,7 +4,7 @@
 
 #### Set working directory ####
 file.choose()
-setwd("/Users/skb/Dropbox/Uni/Student Assistant/Irene Klugkist/")
+setwd("/Users/skb/Dropbox/Uni/Student Assistant/Irene Klugkist")
 
 
 ###########################
@@ -16,7 +16,7 @@ truea <- c(.1,.2,.4,0)
 trueb <- c(.1,.2,.4,0)
 truec <- c(.1,.2,.4,0)
 truen <- c(30,100,200)
-nsim=100
+nsim=1
 
 
 saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
@@ -64,6 +64,6 @@ saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
   }
 }
 
-saveDatasets(truen,truea,trueb,truec,nsim = 100)
+saveDatasets(truen,truea,trueb,truec,nsim = 1)
 
 
