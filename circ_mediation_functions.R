@@ -28,6 +28,7 @@ CircMed_Diff <- function(dt,ind, predictor = "x", mediator = "m", outcome = "y")
   # Prepare outcome 
   outcome <- circular:::as.circular(y)
   
+  boot_dt <- data.frame(predictors,y=outcome)
   # Models
   mediator_model <- lm(m~x, data=dat)
   mediated_model <- circular:::lm.circular.cl(y = outcome ,x = predictors , init = c(0,0))
@@ -43,6 +44,8 @@ CircMed_Diff <- function(dt,ind, predictor = "x", mediator = "m", outcome = "y")
   direct_effect <- c
   total_effect <- c_tilde
   indirect_effect <- c_tilde - c
+  
+  dt <- data.frame(direct_effect,)
   
   # Prepare output
   kappa <- mediated_model$kappa
@@ -82,7 +85,8 @@ CircMed_Product <- function(dt,ind, predictor = "x", mediator = "m", outcome = "
   b <- mediated_model$coefficients[[2]]
   c <- mediated_model$coefficients[[1]]
   c_tilde <- total_model$coefficients
-
+  
+  
   # Calculate effects
   indirect_effect <- a*b
   direct_effect <- c
@@ -262,7 +266,7 @@ simData <- function(a,b,c,n) {
   return(data)
 }
 
-mediationBootstrap <- function(dt, fun, R = 10, probs = c(.025, .975)) {
+mediationBootstrap <- function(dt, fun, R = 1000, probs = c(.025,.25,.5,.75,.975)) {
   
   
   circmedboot <- boot(data=dt,fun, R = R, stype = "i")
@@ -282,7 +286,7 @@ mediationBootstrap <- function(dt, fun, R = 10, probs = c(.025, .975)) {
   res
 }
 
-
+dt <- simulatedData$`n=30a=0.1b=0.1c=0.1`$nr1
 
 
 
@@ -340,7 +344,7 @@ computeClcorMediation <- function(data, inds, outcome="y", predictor="x", mediat
 
 
 clcorMediationBootstrap <- function(data, outcome="y", predictor="x", mediators="m", 
-                                    R = 1000, probs = c(.025, .975), ...) {
+                                    R = 1000, probs = c(.025,.25,.5,.75,.975), ...) {
   
   
   # Compute the bootstrap using the boot package.
@@ -370,8 +374,58 @@ clcorMediationBootstrap <- function(data, outcome="y", predictor="x", mediators=
 
 ## ---------------------------------------------------------------
 
-
-
+## RDS
+loadDatasets <- function(truen,truea,trueb,truec,nsim) {
+  
+  #Prepare all possible designs
+  Alldesigns <- expand.grid(a=truea,b=trueb,c=truec,n=truen,stringsAsFactors=FALSE)
+  nonexistendDesigns <- 0
+  data <- list()
+  for (i in 1:nrow(Alldesigns)) {
+    design <- Alldesigns[i,]
+    
+    curr_a <- design[,1]
+    curr_b <- design[,2]
+    curr_c <- design[,3]
+    curr_n <- design[,4]
+    
+    # Prepare loading datasets
+    DirName <- paste0(getwd(),
+                      "/Data/Datasets_",
+                      "n=", curr_n,
+                      "a=", curr_a,
+                      "b=", curr_b,
+                      "c=", curr_c)
+    DesignName <- paste0("n=", curr_n,
+                         "a=", curr_a,
+                         "b=", curr_b,
+                         "c=", curr_c)
+    dat <- list()
+    # Load all datasets per design
+    for (j in 1:nsim) {
+      
+      filename <- paste0(DirName,"/nr",j,".RDS")
+      filenumber <- paste0("nr",j)
+      
+      if (file.exists(filename)) {
+        dat[[filenumber]] <- readRDS(filename)
+        names(dat[[filenumber]]) <- c("x","m","y")
+        
+      } else {
+        nonexistendDesigns <- nonexistendDesigns + 1
+      }
+      
+    }
+    # Store list of datasets per design in a list
+    data[[DesignName]] <- dat
+  }
+  if (nonexistendDesigns > 0) {
+    cat("\n[Data loading: ", nonexistendDesigns, "/", nsim*nrow(Alldesigns),
+        " datasets did not exist.]\n")
+  }
+  return(data)
+}
+## CSV
 loadDatasets <- function(truen,truea,trueb,truec,nsim) {
   
   #Prepare all possible designs

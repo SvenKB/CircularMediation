@@ -3,9 +3,9 @@
 #################################################
 
 #### Set working directory ####
-file.choose()
-setwd("/Users/skb/Dropbox/Uni/Student Assistant/Irene Klugkist")
-
+#file.choose()
+#setwd("/Users/skb/Dropbox/Uni/Student Assistant/Irene Klugkist")
+getwd()
 
 ###########################
 #### Preparing Samples ####
@@ -16,7 +16,7 @@ truea <- c(.1,.2,.4,0)
 trueb <- c(.1,.2,.4,0)
 truec <- c(.1,.2,.4,0)
 truen <- c(30,100,200)
-nsim=1
+nsim=2
 
 
 saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
@@ -46,11 +46,11 @@ saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
     # Simulate n datasets per design
     for (j in 1:nsim) {
       
-      filename <- paste0(DirName,"/nr",j,".csv")
+      filename <- paste0(DirName,"/nr",j,".RDS")
       
       if (!file.exists(filename)) {
         dat <- simData(a=curr_a,b=curr_b,c=curr_c,n=curr_n)
-        write.table(dat, filename, sep = ",", row.names=FALSE, col.names=FALSE)
+        saveRDS(dat, filename)
       } else {
         existingDesigns <- existingDesigns + 1
       }
@@ -64,6 +64,6 @@ saveDatasets <- function(truen,truea,trueb,truec,nsim, seed = 140689) {
   }
 }
 
-saveDatasets(truen,truea,trueb,truec,nsim = 1)
+system.time(saveDatasets(truen,truea,trueb,truec,nsim = 2))
 
 

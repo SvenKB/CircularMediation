@@ -115,7 +115,6 @@ analyseSimData <- function(simData, method) {
   return(estimates)
 }
 
-typeof(simulatedData[[1]])
 
 testtest <- lapply(simulatedData,mediationBootstrap, fun = CircMed_Product)
 

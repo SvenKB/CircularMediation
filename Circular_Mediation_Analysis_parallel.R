@@ -77,10 +77,11 @@ simulatedData <- loadDatasets(truen,truea,trueb,truec,nsim)
 
 analyseSimDataPar <- function(simData,method) {
   # Calculate the number of cores
-  no_cores <- detectCores() - 1
+  no_cores <- detectCores() - 2
   
   # Initiate cluster
-  cl <- makeCluster(no_cores, type = "FORK")
+  cl <- makeCluster(no_cores, type = "PSOCK")
+  clusterExport(cl, list("as.circular","circGLM","mcmc"))
 
   if (method == "CM_Diff") {
     fun <- CircMed_Diff
@@ -99,22 +100,22 @@ analyseSimDataPar <- function(simData,method) {
     result[[i]] <- parLapply(cl,simData[[i]],fun)
   }
   estimates <- list()
+  est <- list()
   if (method == "CM_B_D" | method == "CM_B_P" ) {
     for (i in 1:length(result)) {
-      estimates[[i]] <-list(cbind("Estimates"=result[[i]]$nr1[[1]],result[[i]]$nr1[[2]]),"Resid.Kappa"=result[[i]]$nr1[[3]])
+      for (j in 1:length(result[[i]])) {
+        est[[j]] <- rbind(cbind("Estimates"=result[[i]][[j]][[1]],result[[i]][[j]][[2]]),"Resid.Kappa"=c(result[[i]][[j]][[3]],rep(0,8)))
+      }
+      estimates[[i]] <- est
     }
     
   } else {
-  a <- matrix(0,  length(simData[[1]]),length(result[[1]]$nr1))
+  #a <- matrix(0,  length(simData[[1]]),length(result[[1]]$nr1))
   for (j in 1:length(result)) {
-    
-    for (k in 1:length(result[[1]]$nr1)) {
-      a[,k] <- as.vector(unlist(parLapply(cl,result[[j]],"[",k)))
-    }
-    estimates[[j]] <- a
+    estimates[[j]] <- result[[j]]$tab
     colnames(estimates[[j]]) <- names(result[[1]]$nr1)
   }
-  }
+}
   stopCluster(cl)
   names(estimates) <- names(simData)
   
